@@ -51,7 +51,7 @@ RCT_EXPORT_MODULE()
                                               @"transactionDate": @(transaction.transactionDate.timeIntervalSince1970 * 1000),
                                               @"transactionIdentifier": transaction.transactionIdentifier,
                                               @"productIdentifier": transaction.payment.productIdentifier,
-                                              @"transactionReceipt": [[transaction transactionReceipt] base64EncodedStringWithOptions:0]
+                                              @"transactionReceipt": [[NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]] base64EncodedStringWithOptions:0]
                                               };
                     callback(@[[NSNull null], purchase]);
                     [_callbacks removeObjectForKey:key];
@@ -117,7 +117,7 @@ restoreCompletedTransactionsFailedWithError:(NSError *)error
     if (callback) {
         NSMutableArray *productsArrayForJS = [NSMutableArray array];
         for(SKPaymentTransaction *transaction in queue.transactions){
-            if(transaction.transactionState == SKPaymentTransactionStateRestored) {
+            if(transaction.transactionState == SKPaymentTransactionStateRestored && transaction.originalTransaction) {
                 SKPaymentTransaction *originalTransaction = transaction.originalTransaction;
 
                 NSDictionary *purchase = @{
@@ -126,7 +126,7 @@ restoreCompletedTransactionsFailedWithError:(NSError *)error
                     @"transactionDate": @(transaction.transactionDate.timeIntervalSince1970 * 1000),
                     @"transactionIdentifier": transaction.transactionIdentifier,
                     @"productIdentifier": transaction.payment.productIdentifier,
-                    @"transactionReceipt": [[transaction transactionReceipt] base64EncodedStringWithOptions:0]
+                    @"transactionReceipt": [[NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]] base64EncodedStringWithOptions:0]
                 };
 
                 [productsArrayForJS addObject:purchase];
